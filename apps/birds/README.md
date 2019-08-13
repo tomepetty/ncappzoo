@@ -22,7 +22,7 @@ There are a few thresholds in the code you may want to tweek if you aren't getti
 ## Makefile
 Provided Makefile has various targets that help with the above mentioned tasks.
 
-### make run
+### make run or make run_py
 Runs the sample application.
 
 ### make help

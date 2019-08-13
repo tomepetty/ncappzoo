@@ -24,7 +24,7 @@ This program requires:
 ## Makefile
 Provided Makefile has various targets that help with the above mentioned tasks.
 
-### make run
+### make run or make run_py
 Runs the sample application.
 
 ### make help
