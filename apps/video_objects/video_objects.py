@@ -27,19 +27,13 @@ from ssd_mobilenet_processor import ssd_mobilenet_processor
     
     
 # name of the opencv window
-cv_window_name = "SSD Mobilenet"
+cv_window_name = "Video Objects - SSD Mobilenet"
 ssd_ir = "mobilenet-ssd.xml"
 
 # labels AKA classes.  The class IDs returned
 # are the indices into this list
-labels = ('background',
-          'aeroplane', 'bicycle', 'bird', 'boat',
-          'bottle', 'bus', 'car', 'cat', 'chair',
-          'cow', 'diningtable', 'dog', 'horse',
-          'motorbike', 'person', 'pottedplant',
-          'sheep', 'sofa', 'train', 'tvmonitor')
-
 LABELS_FILE_NAME = 'labels.txt'
+
 # only accept classifications with 1 in the class id index.
 # default is to accept all object clasifications.
 # for example if object_classifications_mask[1] == 0 then
@@ -60,8 +54,6 @@ min_score_percent = DEFAULT_INIT_MIN_SCORE
 resize_output = False
 resize_output_width = 0
 resize_output_height = 0
-
-
 
 # read video files from this directory
 input_video_path = '.'
@@ -90,66 +82,6 @@ def handle_keys(raw_key):
 
     return True
 
-
-# overlays the boxes and labels onto the display image.
-# display_image is the image on which to overlay the boxes/labels
-# object_info is a list of 7 values as returned from the network
-#     These 7 values describe the object found and they are:
-#         0: image_id (always 0 for myriad)
-#         1: class_id (this is an index into labels)
-#         2: score (this is the probability for the class)
-#         3: box left location within image as number between 0.0 and 1.0
-#         4: box top location within image as number between 0.0 and 1.0
-#         5: box right location within image as number between 0.0 and 1.0
-#         6: box bottom location within image as number between 0.0 and 1.0
-# returns None
-def overlay_on_image(display_image, object_info):
-    source_image_width = display_image.shape[1]
-    source_image_height = display_image.shape[0]
-
-    base_index = 0
-    class_id = int(object_info[base_index + 1])
-    if (class_id < 0):
-        return
-
-    if (object_classifications_mask[class_id] == 0):
-        return
-
-    percentage = int(object_info[base_index + 2] * 100)
-    if (percentage <= min_score_percent):
-        return
-
-    label_text = labels[class_id] + " (" + str(percentage) + "%)"
-    box_left = int(object_info[base_index + 3] * source_image_width)
-    box_top = int(object_info[base_index + 4] * source_image_height)
-    box_right = int(object_info[base_index + 5] * source_image_width)
-    box_bottom = int(object_info[base_index + 6] * source_image_height)
-
-    box_color = (255, 128, 0)  # box color
-    box_thickness = 2
-    cv2.rectangle(display_image, (box_left, box_top), (box_right, box_bottom), box_color, box_thickness)
-
-    scale_max = (100.0 - min_score_percent)
-    scaled_prob = (percentage - min_score_percent)
-    scale = scaled_prob / scale_max
-
-    # draw the classification label string just above and to the left of the rectangle
-    #label_background_color = (70, 120, 70)  # greyish green background for text
-    label_background_color = (0, int(scale * 175), 75)
-    label_text_color = (255, 255, 255)  # white text
-
-    label_size = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
-    label_left = box_left
-    label_top = box_top - label_size[1]
-    if (label_top < 1):
-        label_top = 1
-    label_right = label_left + label_size[0]
-    label_bottom = label_top + label_size[1]
-    cv2.rectangle(display_image, (label_left - 1, label_top - 1), (label_right + 1, label_bottom + 1),
-                  label_background_color, -1)
-
-    # label text above the box
-    cv2.putText(display_image, label_text, (label_left, label_bottom), cv2.FONT_HERSHEY_SIMPLEX, 0.5, label_text_color, 1)
 
 
 #return False if found invalid args or True if processed ok
@@ -354,9 +286,11 @@ def main():
                     exit_app = True
                     break
 
+				# do inference
                 objects = ssd_processor.ssd_mobilenet_inference(display_image, cap.get(3), cap.get(4))
-                
+                # display results
                 process_and_display_results(objects, display_image, labels_list)
+                
                 if (resize_output):
                     display_image = cv2.resize(display_image,
                                                (resize_output_width, resize_output_height),
