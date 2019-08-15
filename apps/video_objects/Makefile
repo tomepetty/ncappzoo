@@ -1,12 +1,4 @@
 
-ifneq ($(findstring movidius, $(PYTHONPATH)), movidius)
-	export PYTHONPATH:=/opt/movidius/caffe/python:$(PYTHONPATH)
-endif
-
-NCCOMPILE = mvNCCompile
-NCPROFILE = mvNCProfile
-NCCHECK   = mvNCCheck
-
 # filenames for the graph files that we'll copy to this directory.
 SSD_MOBILENET_GRAPH_FILENAME = graph
 
@@ -73,5 +65,7 @@ clean:
 	rm -f ${SSD_MOBILENET_GRAPH_FILENAME}
 	rm -f *.mp4
 	rm -f licenses.txt
+	rm -f mobilenet-ssd.bin
+	rm -f mobilenet-ssd.xml
 
 
