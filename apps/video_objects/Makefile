@@ -23,18 +23,21 @@ all: prereqs videos ssd_mobilenet
 .PHONY: ssd_mobilenet
 ssd_mobilenet: 
 	@echo "\nmaking ssd_mobilenet"
-	(cd ../../caffe/SSD_MobileNet; make compile; cd ../../apps/video_objects; cp ../../caffe/SSD_MobileNet/graph ./${SSD_MOBILENET_GRAPH_FILENAME};) 
+	(cd ../../caffe/SSD_Mobilenet; make compile_model; cd ../../apps/video_objects; cp ../../caffe/SSD_Mobilenet/mobilenet-ssd.xml .; cp ../../caffe/SSD_Mobilenet/mobilenet-ssd.bin .;)
+
 
 .PHONY: videos
 videos:
 	@echo "\nmaking videos"
 	${GET_VIDEOS};
 
+
 .PHONY: prereqs
 prereqs:
 	@echo "\nmaking prereqs"
 	@sed -i 's/\r//' *.py
 	@chmod +x *.py
+
 
 .PHONY: run_py
 run_py: prereqs ssd_mobilenet videos

@@ -3,19 +3,32 @@
 # Copyright(c) 2017 Intel Corporation. 
 # License: MIT See LICENSE file in root directory.
 
+GREEN = '\033[1;32m'
+RED = '\033[1;31m'
+NOCOLOR = '\033[0m'
+YELLOW = '\033[1;33m'
+DEVICE = "MYRIAD"
+
+try:
+    from openvino.inference_engine import IENetwork, IECore
+except:
+    print(RED + '\nPlease make sure your OpenVINO environment variables are set by sourcing the' + YELLOW + ' setupvars.sh ' + RED + 'script found in <your OpenVINO install location>/bin/ folder.\n' + NOCOLOR)
+    exit(1)
+
+
 import sys
-sys.path.insert(0, "../../ncapi2_shim")
-import mvnc_simple_api as mvnc
-#from mvnc import mvncapi as mvnc
 import numpy
 import cv2
 import time
 import csv
 import os
 from sys import argv
-
+from ssd_mobilenet_processor import ssd_mobilenet_processor
+    
+    
 # name of the opencv window
 cv_window_name = "SSD Mobilenet"
+ssd_ir = "mobilenet-ssd.xml"
 
 # labels AKA classes.  The class IDs returned
 # are the indices into this list
@@ -26,6 +39,7 @@ labels = ('background',
           'motorbike', 'person', 'pottedplant',
           'sheep', 'sofa', 'train', 'tvmonitor')
 
+LABELS_FILE_NAME = 'labels.txt'
 # only accept classifications with 1 in the class id index.
 # default is to accept all object clasifications.
 # for example if object_classifications_mask[1] == 0 then
@@ -57,9 +71,6 @@ input_video_path = '.'
 def preprocess_image(source_image):
     resized_image = cv2.resize(source_image, (NETWORK_IMAGE_WIDTH, NETWORK_IMAGE_HEIGHT))
     
-    # trasnform values from range 0-255 to range -1.0 - 1.0
-    resized_image = resized_image - 127.5
-    resized_image = resized_image * 0.007843
     return resized_image
 
 # handles key presses by adjusting global thresholds etc.
@@ -199,62 +210,51 @@ def handle_args():
     return True
 
 
+
+def text_setup(frame, labels_list, class_id, confidence, box_left, box_top):
+    # label shape and colorization for displaying
+    label_text = labels_list[class_id] + " " + str("{0:.2f}".format(confidence))
+    label_background_color = (70, 120, 70) # grayish green background for text
+    label_text_color = (255, 255, 255)   # white text
+    
+    label_size = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+    label_left = int(box_left)
+    label_top = int(box_top) - label_size[1]
+    label_right = label_left + label_size[0]
+    label_bottom = label_top + label_size[1]
+
+    # set up the greenish colored rectangle background for text
+    cv2.rectangle(frame, (label_left - 1, label_top - 5),(label_right + 1, label_bottom + 1), label_background_color, -1)
+    # set up text
+    cv2.putText(frame, label_text, (int(box_left), int(box_top - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, label_text_color, 1)
+    
+    
 # Run an inference on the passed image
 # image_to_classify is the image on which an inference will be performed
 #    upon successful return this image will be overlayed with boxes
 #    and labels identifying the found objects within the image.
 # ssd_mobilenet_graph is the Graph object from the NCAPI which will
 #    be used to peform the inference.
-def run_inference(image_to_classify, ssd_mobilenet_graph):
-
-    # preprocess the image to meet nework expectations
-    resized_image = preprocess_image(image_to_classify)
-
-    # Send the image to the NCS as 16 bit floats
-    ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
-
-    # Get the result from the NCS
-    output, userobj = ssd_mobilenet_graph.GetResult()
-
-    #   a.	First fp16 value holds the number of valid detections = num_valid.
-    #   b.	The next 6 values are unused.
-    #   c.	The next (7 * num_valid) values contain the valid detections data
-    #       Each group of 7 values will describe an object/box These 7 values in order.
-    #       The values are:
-    #         0: image_id (always 0)
-    #         1: class_id (this is an index into labels)
-    #         2: score (this is the probability for the class)
-    #         3: box left location within image as number between 0.0 and 1.0
-    #         4: box top location within image as number between 0.0 and 1.0
-    #         5: box right location within image as number between 0.0 and 1.0
-    #         6: box bottom location within image as number between 0.0 and 1.0
-
+def process_and_display_results(output, frame, labels_list):
+    box_color = (0, 255, 0)
+    box_thickness = 1
     # number of boxes returned
-    num_valid_boxes = int(output[0])
+    num_valid_boxes = int(len(output)/7)
 
     for box_index in range(num_valid_boxes):
-            base_index = 7+ box_index * 7
-            if (not numpy.isfinite(output[base_index]) or
-                    not numpy.isfinite(output[base_index + 1]) or
-                    not numpy.isfinite(output[base_index + 2]) or
-                    not numpy.isfinite(output[base_index + 3]) or
-                    not numpy.isfinite(output[base_index + 4]) or
-                    not numpy.isfinite(output[base_index + 5]) or
-                    not numpy.isfinite(output[base_index + 6])):
-                # boxes with non finite (inf, nan, etc) numbers must be ignored
-                continue
-
-            x1 = max(int(output[base_index + 3] * image_to_classify.shape[0]), 0)
-            y1 = max(int(output[base_index + 4] * image_to_classify.shape[1]), 0)
-            x2 = min(int(output[base_index + 5] * image_to_classify.shape[0]), image_to_classify.shape[0]-1)
-            y2 = min((output[base_index + 6] * image_to_classify.shape[1]), image_to_classify.shape[1]-1)
-
-            # overlay boxes and labels on to the image
-            overlay_on_image(image_to_classify, output[base_index:base_index + 7])
-
+        # set up the text to display with the bounding box in the frame
+        text_setup(frame, labels_list, output[1+box_index*7], output[2+box_index*7], output[3+box_index*7], output[4+box_index*7])
+        # set up the detection box in the frame
+        box_left = output[3+box_index*7]
+        box_top = output[4+box_index*7]
+        box_right = output[5+box_index*7]
+        box_bottom = output[6+box_index*7]
+        cv2.rectangle(frame, (box_left, box_top), (box_right, box_bottom), box_color, box_thickness)
+        
+        
     # display text to let user know how to quit
-    cv2.rectangle(image_to_classify,(0, 0),(100, 15), (128, 128, 128), -1)
-    cv2.putText(image_to_classify, "Q to Quit", (10, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
+    cv2.rectangle(frame, (0, 0),(100, 15), (128, 128, 128), -1)
+    cv2.putText(frame, "Q to Quit", (10, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
 
 
 # prints usage information
@@ -293,29 +293,11 @@ def main():
         print_usage()
         return 1
 
-    # configure the NCS
-    mvnc.SetGlobalOption(mvnc.GlobalOption.LOG_LEVEL, 2)
+    ie = IECore()
+    # Create Tiny Yolo and GoogLeNet processors for running inferences. 
+    # Please see tiny_yolo_processor.py and googlenet_processor.py for more information.
+    ssd_processor = ssd_mobilenet_processor(ssd_ir, ie, DEVICE)
 
-    # Get a list of ALL the sticks that are plugged in
-    devices = mvnc.EnumerateDevices()
-    if len(devices) == 0:
-        print('No devices found')
-        quit()
-
-    # Pick the first stick to run the network
-    device = mvnc.Device(devices[0])
-
-    # Open the NCS
-    device.OpenDevice()
-
-    graph_filename = 'graph'
-
-    # Load graph file to memory buffer
-    with open(graph_filename, mode='rb') as f:
-        graph_data = f.read()
-
-    # allocate the Graph instance from NCAPI by passing the memory buffer
-    ssd_mobilenet_graph = device.AllocateGraph(graph_data)
 
     # get list of all the .mp4 files in the image directory
     input_video_filename_list = os.listdir(input_video_path)
@@ -328,6 +310,10 @@ def main():
 
     cv2.namedWindow(cv_window_name)
     cv2.moveWindow(cv_window_name, 10,  10)
+    
+    labels_list = numpy.loadtxt(LABELS_FILE_NAME, str, delimiter='\t')
+    with open(LABELS_FILE_NAME) as labels_file:
+        labels_list = labels_file.read().splitlines()
 
     exit_app = False
     while (True):
@@ -368,8 +354,9 @@ def main():
                     exit_app = True
                     break
 
-                run_inference(display_image, ssd_mobilenet_graph)
-
+                objects = ssd_processor.ssd_mobilenet_inference(display_image, cap.get(3), cap.get(4))
+                
+                process_and_display_results(objects, display_image, labels_list)
                 if (resize_output):
                     display_image = cv2.resize(display_image,
                                                (resize_output_width, resize_output_height),
@@ -394,10 +381,6 @@ def main():
 
         if (exit_app):
             break
-
-    # Clean up the graph and the device
-    ssd_mobilenet_graph.DeallocateGraph()
-    device.CloseDevice()
 
 
     cv2.destroyAllWindows()
