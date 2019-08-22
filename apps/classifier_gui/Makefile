@@ -56,21 +56,16 @@ run: run_py
 	
 	
 .PHONY: run_py
-run_py: install-reqs deps googlenet alexnet squeezenet 
+run_py: data data deps googlenet alexnet squeezenet 
 	@echo $(YELLOW)'\n'${APP_NAME}": Running the sample..."$(NOCOLOR)
-	python3 ${APP_NAME}.py
-
-
-.PHONY: install-reqs
-install-reqs: 
-	@echo $(YELLOW)'\n'${APP_NAME}": Checking application requirements...\n"$(NOCOLOR)
 	@echo "Checking python3-pil.imagetk..."
 	@if $(shell) ${CHECK_IMAGETK} 2> /dev/null; \
 	then \
 		echo " - python3-pil.imagetk already installed.\n"; \
 	else \
-		echo $(YELLOW)"ATTENTION! "$(NOCOLOR)"python3-pil.imagetk is required to run this sample.";\
-		echo "Use the command:" $(YELLOW)"sudo apt-get install -y python3-pil.imagetk"$(NOCOLOR)" to install requirement.\n"; \
+		echo $(YELLOW)"ATTENTION! "$(NOCOLOR)"python3-pil.imagetk is required to run this sample.\n";\
+		echo "Please use the command: "$(YELLOW)" make install-reqs "$(NOCOLOR)" to install the requirement."; \
+		echo "or use the command:" $(YELLOW)"sudo apt-get install -y python3-pil.imagetk"$(NOCOLOR)" to manually install requirement.\n"; \
 		exit 1;\
 	fi; \
 	
@@ -79,9 +74,56 @@ install-reqs:
 	then \
 	    echo " - scikit-image already installed.\n" ; \
 	else \
-		echo $(YELLOW)"\nATTENTION! "$(NOCOLOR)"scikit-image is required to run this sample."; \
-		echo "Use the command: " $(YELLOW)"pip3 install scikit-image --user"$(NOCOLOR)" to install requirement."; \
+		echo $(YELLOW)"\nATTENTION! "$(NOCOLOR)"scikit-image is required to run this sample.\n"; \
+		echo "Please use the command: "$(YELLOW)" make install-reqs "$(NOCOLOR)" to install the requirement."; \
+		echo "or use the command: " $(YELLOW)"pip3 install scikit-image --user"$(NOCOLOR)" to manually install requirement.\n"; \
 		exit 1; \
+	fi; \
+	python3 ${APP_NAME}.py
+
+
+.PHONY: install-reqs
+install-reqs: 
+	@echo $(YELLOW)'\n'${APP_NAME}": Checking application requirements...\n"$(NOCOLOR)
+	@echo "\n Checking python3-pil.imagetk..."
+	@if $(shell) ${CHECK_IMAGETK} 2> /dev/null; \
+	then \
+		echo " - python3-pil.imagetk already installed.\n"; \
+	else \
+		echo $(YELLOW)"Installing python3-pil.imagetk... "$(NOCOLOR); \
+		sudo apt-get install python3-pil.imagetk; \
+	fi; \
+	
+	@echo "\n Checking scikit-image..."
+	@if ${shell} ${CHECK_SKIMAGE} 2> /dev/null; \
+	then \
+	    echo " - scikit-image already installed.\n" ; \
+	else \
+		echo $(YELLOW)"Installing scikit-image..."$(NOCOLOR); \
+		pip3 install scikit-image --user; \
+	fi
+	
+	
+.PHONY: uninstall-reqs
+uninstall-reqs: 
+	@echo $(YELLOW)'\n'${APP_NAME}": Uninstalling requirements..."$(NOCOLOR)
+	@echo $(YELLOW)"\n Checking python3-pil.imagetk..."$(NOCOLOR)
+	@if $(shell) ${CHECK_IMAGETK} 2> /dev/null; \
+	then \
+		echo $(YELLOW)"\n - Uninstalling python3-pil.imagetk..."$(NOCOLOR); \
+		sudo apt-get remove python3-pil.imagetk; \
+		sudo apt autoremove -y; \
+	else \
+		echo " - Uninstall cancelled. Requirement is not installed."; \
+	fi; \
+	
+	@echo $(YELLOW)"\n Checking scikit-image..."$(NOCOLOR)
+	@if ${shell} ${CHECK_SKIMAGE} 2> /dev/null; \
+	then \
+		echo $(YELLOW)"\n - Uninstalling scikit-image..."$(NOCOLOR); \
+		pip3 uninstall scikit-image; \
+	else \
+		echo " - Uninstall cancelled. Requirement is not installed.."; \
 	fi
 	
 	
@@ -96,6 +138,7 @@ help:
 	@echo $(YELLOW)"  make install-reqs "$(NOCOLOR)"- Installs requirements needed to run this sample on your system.";
 	@echo $(YELLOW)"                      python3-pil.imagetk";
 	@echo $(YELLOW)"                      scikit-image(aka skimage)";
+	@echo $(YELLOW)"  make uninstall-reqs "$(NOCOLOR)"- Uninstalls requirements that were installed by the sample program.";
 	@echo $(YELLOW)"  make default_model "$(NOCOLOR)"- compiles a default model to use when running";
 	@echo $(YELLOW)"  make clean "$(NOCOLOR)"- removes all created content"
 	@echo ""

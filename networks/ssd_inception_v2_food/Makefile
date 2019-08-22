@@ -31,6 +31,7 @@ GET_MO_MODEL_FP16_LABELS = wget -c --no-cache -P ./ssd_inception_v2_mo_fp16 http
 GET_TEST_IMG1 = wget -c --no-cache -P ./test_images https://raw.githubusercontent.com/fcr3/chef_devmesh/master/test_images/test1.JPG
 GET_TEST_IMG2 = wget -c --no-cache -P ./test_images https://raw.githubusercontent.com/fcr3/chef_devmesh/master/test_images/test2.JPG
 GET_TEST_IMG3 = wget -c --no-cache -P ./test_images https://raw.githubusercontent.com/fcr3/chef_devmesh/master/test_images/test3.JPG
+GET_TEST_LICENSE = wget -c --no-cache -P ./test_images https://raw.githubusercontent.com/fcr3/chef_devmesh/master/test_images/license.txt
 GET_MODEL_PB = python3 download_weights.py
 
 RUN_PY_RELATIVE_DIR = ssd_inception_v2_food.py
@@ -38,6 +39,7 @@ TEST_IMG_DIR = test_images
 TEST_IMG1 = test_images/test1.JPG
 TEST_IMG2 = test_images/test2.JPG
 TEST_IMG3 = test_images/test3.JPG
+TEST_LICENSE = test_images/license.txt
 
 
 .PHONY: all
@@ -45,8 +47,14 @@ all: deps data compile_model
 
 .PHONY: deps
 deps: get_model
-	@echo $(YELLOW)"\nSSD Inception V2 Food: Making dependencies... No extra dependencies needed."$(NOCOLOR)
-
+	@echo $(YELLOW)"\nSSD Inception V2 Food: Making dependencies... "$(NOCOLOR)
+	@if [ -z "$(INTEL_OPENVINO_DIR)" ] ; \
+	then \
+		echo "Please initiate the Intel OpenVINO environment by going to the installation directory for openvino and running the setupvars.sh file in the bin folder." ; \
+		exit 1 ; \
+	else \
+		echo "Intel OpenVINO environment is already set!" ; \
+	fi
 
 .PHONY: data
 data:
@@ -71,6 +79,13 @@ data:
 	else \
 		echo "Downloading ${TEST_IMG3} file"; \
 		${GET_TEST_IMG3}; \
+	fi
+	@if [ -e ${TEST_LICENSE} ] ; \
+	then \
+		echo "license file ${TEST_LICENSE} already exists, skipping download"; \
+	else \
+		echo "Downloading ${TEST_LICENSE} file"; \
+		${GET_TEST_LICENSE}; \
 	fi
 
 
@@ -114,6 +129,13 @@ train:
 
 .PHONY: compile_model
 compile_model: get_model
+	@if [ -z "$(INTEL_OPENVINO_DIR)" ] ; \
+	then \
+		echo "Please initiate the Intel OpenVINO environment by going to the installation directory for openvino and running the setupvars.sh file in the bin folder." ; \
+		exit 1 ; \
+	else \
+		echo "mo.py path is already set!" ; \
+	fi
 	@echo $(YELLOW)"\nSSD Inception V2 Food: Compiling model to IR..."$(NOCOLOR)
 	@if [ -e ${GRAPH_FILENAME_BASE_IN_DIR_FP32} ] ; \
 	then \
@@ -147,20 +169,14 @@ compile_model: get_model
 	fi
 
 
-.PHONY: install-reqs
-install-reqs:
-	@echo $(YELLOW)"\nSSD Inception V2 Food: Checking application requirements...\n"$(NOCOLOR)
-	@echo "No requirements needed."
-
-
 .PHONY: run_FP16
-run_FP16: install-reqs deps data compile_model
+run_FP16: deps data compile_model
 	@echo $(YELLOW) "\nSSD Inception V2 Food: Running Python sample..." $(NOCOLOR)
 	python3 $(RUN_PY_RELATIVE_DIR) -i ${TEST_IMG1} -m ${GRAPH_FILENAME_BASE_IN_DIR_FP16} -l ${MO_LABELS_IN_DIR_FP16} -d MYRIAD
 
 
 .PHONY: run_FP32
-run_FP32: install-reqs deps data compile_model
+run_FP32: deps data compile_model
 	@echo $(YELLOW) "\nSSD Inception V2 Food: Running Python sample..." $(NOCOLOR)
 	python3 $(RUN_PY_RELATIVE_DIR) -i ${TEST_IMG1} -m ${GRAPH_FILENAME_BASE_IN_DIR_FP32} -e ${CPU_EXTENSION} --l ${MO_LABELS_IN_DIR_FP32}
 
@@ -170,22 +186,34 @@ run: run_py
 
 
 .PHONY: run_py
-run_py: install-reqs deps data compile_model run_FP16
+run_py: deps data compile_model run_FP16
 
+
+.PHONY: install-reqs
+install-reqs:
+	@echo $(YELLOW)"\nSSD Inception V2 Food: Checking application requirements...\n"$(NOCOLOR)
+	@echo "No requirements needed."
+
+
+.PHONY: uninstall-reqs
+uninstall-reqs: 
+	@echo $(YELLOW)"\nSSD Inception V2 Food: Uninstalling requirements..."$(NOCOLOR)
+	@echo "Nothing to uninstall."
+	
 
 .PHONY: help
 help:
 	@echo "\nPossible make targets"
 	@echo $(YELLOW)"  make help " $(NOCOLOR) "- Shows this message.";
-	@echo $(YELLOW)"  make run " $(NOCOLOR) "- Runs the Python example.";
-	@echo $(YELLOW)"  make run_py " $(NOCOLOR) "- Runs the Python example.";
+	@echo $(YELLOW)"  make run or run_py " $(NOCOLOR) "- Runs the Python example.";
 	@echo $(YELLOW)"  make all " $(NOCOLOR) "- Makes everything needed to run, but doesn't run the sample.";
 	@echo $(YELLOW)"  make compile_model " $(NOCOLOR) "- Runs model compiler for the network.";
-	@echo $(YELLOW)"  make model " $(NOCOLOR) "- Downloads the model files.";
 	@echo $(YELLOW)"  make data " $(NOCOLOR) "- Downloads required data.";
 	@echo $(YELLOW)"  make deps " $(NOCOLOR) "- Makes dependencies for project, prepares model etc.";
+	@echo $(YELLOW)"  make install-reqs "$(NOCOLOR)"- Installs requirements needed to run this sample on your system.";
+	@echo $(YELLOW)"  make uninstall-reqs "$(NOCOLOR)"- Uninstalls requirements that were installed by the sample program.";
 	@echo $(YELLOW)"  make clean " $(NOCOLOR) "- Removes all the temporary files that are created by the Makefile.";
-	@echo $(YELLOW)"  make train " $(NOCOLOR) "- Train a mnist model.";
+	@echo $(YELLOW)"  make train " $(NOCOLOR) "- (TBD) Train the mnist model.";
 
 clean: clean
 	@echo $(YELLOW)"\nSSD Inception V2 Food: Cleaning up files..."$(NOCOLOR)

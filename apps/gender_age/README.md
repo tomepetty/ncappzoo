@@ -1,9 +1,10 @@
-# gender_age: 
+# gender_age
 ## Introduction
 This app does facial detection and age/gender inference using the Intel Movidius Neural Compute Stick 2. 
 
-The example does face detection on a camera frame using face-detection-retail.0004, crops the detected faces, then does age and gender inference using the age-gender network. All models can be found on the [Open Model Zoo](https://github.com/opencv/open_model_zoo). This sample uses pre-compiled IRs, so the model optimizer is not utilized.
+The example does face detection on a camera frame using face-detection-retail.0004, crops the detected faces, then does age and gender inference using the age-gender network. When running, the app shows the realtime camera preview while overlaying, a box around faces (color coded for gender), and an estimated age.  All models can be found on the [Open Model Zoo](https://github.com/opencv/open_model_zoo). This sample uses pre-compiled IRs, so the model optimizer is not utilized.
 
+![](gender_age_3.gif)
 
 ## Building the Example
 
@@ -52,8 +53,11 @@ Builds all of the dependencies needed to run the sample.
 ### make default_model
 Compiles an IR file from a default model to be used when running the sample.
 
-### make install_reqs
+### make install-reqs
 Checks required packages that aren't installed as part of the OpenVINO installation. 
+
+### make uninstall-reqs
+Uninstalls requirements that were installed by the sample program.
  
 ### make clean
 Removes all the temporary files that are created by the Makefile.

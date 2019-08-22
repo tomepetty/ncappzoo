@@ -48,7 +48,7 @@ deps: default_model
 
 
 .PHONY: run_py
-run_py: install-reqs data deps
+run_py: data deps
 	@echo $(YELLOW)'\n'${APP_NAME}": Running the sample..."$(NOCOLOR)
 	python3 ./${APP_NAME}.py dev=${DEV} mx=${XML} mb=${BIN}
 
@@ -59,8 +59,15 @@ run: run_py
 
 .PHONY: install-reqs
 install-reqs: 
-	@echo $(YELLOW)'\n'${APP_NAME}": No installation requirements needed."$(NOCOLOR)
+	@echo $(YELLOW)"\n"$(APP_NAME)": Checking installation requirements..."$(NOCOLOR)
 	@echo "No requirements needed."
+
+
+.PHONY: uninstall-reqs
+uninstall-reqs: 
+	@echo $(YELLOW)'\n'${APP_NAME}": Uninstalling requirements..."$(NOCOLOR)
+	@echo "Nothing to uninstall."
+	
 
 .PHONY: help
 help:
@@ -71,6 +78,7 @@ help:
 	@echo $(YELLOW)"  make data "$(NOCOLOR)"- downloads data as needed";
 	@echo $(YELLOW)"  make deps "$(NOCOLOR)"- makes/prepares dependencies";
 	@echo $(YELLOW)"  make install-reqs "$(NOCOLOR)"- Installs requirements needed to run this sample on your system.";
+	@echo $(YELLOW)"  make uninstall-reqs "$(NOCOLOR)"- Uninstalls requirements that were installed by the sample program.";
 	@echo $(YELLOW)"  make default_model "$(NOCOLOR)"- compiles a default model to use when running";
 	@echo $(YELLOW)"  make clean "$(NOCOLOR)"- removes all created content";
 	@echo ""

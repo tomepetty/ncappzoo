@@ -119,20 +119,14 @@ compile_model: get_model
 	fi
 
 
-.PHONY: install-reqs
-install-reqs:
-	@echo $(YELLOW)"\nSSD Inception V2 Gesture: Checking application requirements...\n"$(NOCOLOR)
-	@echo "No requirements needed."
-
-
 .PHONY: run_FP16
-run_FP16: install-reqs deps data compile_model
+run_FP16: deps data compile_model
 	@echo $(YELLOW) "\nSSD Inception V2: Running Python sample..." $(NOCOLOR)
 	python3 $(RUN_PY_RELATIVE_DIR) -i 'cam' -m ${GRAPH_FILENAME_BASE_IN_DIR_FP16} --labels ${MO_LABELS_IN_DIR_FP16} -d MYRIAD
 
 
 .PHONY: run_FP32
-run_FP32: install-reqs deps data compile_model
+run_FP32: deps data compile_model
 	@echo $(YELLOW) "\nSSD Inception V2: Running Python sample..." $(NOCOLOR)
 	python3 $(RUN_PY_RELATIVE_DIR) -i 'cam' -m ${GRAPH_FILENAME_BASE_IN_DIR_FP32} -l ${CPU_EXTENSION} --labels ${MO_LABELS_IN_DIR_FP32}
 
@@ -142,15 +136,26 @@ run: run_py
 
 
 .PHONY: run_py
-run_py: install-reqs deps data compile_model run_FP16
+run_py: deps data compile_model run_FP16
+
+
+.PHONY: install-reqs
+install-reqs:
+	@echo $(YELLOW)"\nSSD Inception V2 Gesture: Checking application requirements...\n"$(NOCOLOR)
+	@echo "No requirements needed."
+	
+	
+.PHONY: uninstall-reqs
+uninstall-reqs: 
+	@echo $(YELLOW)"\nSSD Inception V2 Gesture: Uninstalling requirements..."$(NOCOLOR)
+	@echo "Nothing to uninstall."
 
 
 .PHONY: help
 help:
 	@echo "\nPossible make targets"
 	@echo $(YELLOW)"  make help " $(NOCOLOR) "- Shows this message.";
-	@echo $(YELLOW)"  make run " $(NOCOLOR) "- Runs the Python example.";
-	@echo $(YELLOW)"  make run_py " $(NOCOLOR) "- Runs the Python example.";
+	@echo $(YELLOW)"  make run or run_py " $(NOCOLOR) "- Runs the Python example.";
 	@echo $(YELLOW)"  make run_FP16 "  $(NOCOLOR) "- Runs the Python example with FP16 model.";
 	@echo $(YELLOW)"  make run_FP32 " $(NOCOLOR) "- Runs the Python example with FP32 model.";
 	@echo $(YELLOW)"  make all " $(NOCOLOR) "- Makes everything needed to run, but doesn't run the sample.";
@@ -158,6 +163,8 @@ help:
 	@echo $(YELLOW)"  make get_model " $(NOCOLOR) "- Downloads the model files.";
 	@echo $(YELLOW)"  make data " $(NOCOLOR) "- Downloads required data.";
 	@echo $(YELLOW)"  make deps " $(NOCOLOR) "- Makes dependencies for project, prepares model etc.";
+	@echo $(YELLOW)"  make install-reqs "$(NOCOLOR)"- Installs requirements needed to run this sample on your system.";
+	@echo $(YELLOW)"  make uninstall-reqs "$(NOCOLOR)"- Uninstalls requirements that were installed by the sample program.";
 	@echo $(YELLOW)"  make clean " $(NOCOLOR) "- Removes all the temporary files that are created by the Makefile.";
 	@echo $(YELLOW)"  make train " $(NOCOLOR) "- Train a SSD Inception V2  model.";
 
