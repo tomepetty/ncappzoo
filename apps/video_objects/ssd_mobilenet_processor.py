@@ -36,9 +36,12 @@ class ssd_mobilenet_processor:
     
     # Performs the image preprocessing and makes an inference
     # Returns a list of detected object names, four bounding box points, and the object score
-    def ssd_mobilenet_inference(self, input_image, image_w, image_h):
+    def ssd_mobilenet_inference(self, input_image):
         # Resize the image, convert to fp32, then transpose to CHW
         frame = input_image
+        image_h = frame.shape[0]
+        image_w = frame.shape[1]
+
         input_image = cv2.resize(input_image, (self.ssd_w, self.ssd_h), cv2.INTER_LINEAR)
         input_image = input_image.astype(np.float32)
         input_image = np.transpose(input_image, (2,0,1))

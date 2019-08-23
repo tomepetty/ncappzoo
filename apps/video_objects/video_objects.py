@@ -287,7 +287,7 @@ def main():
                     break
 
 				# do inference
-                objects = ssd_processor.ssd_mobilenet_inference(display_image, cap.get(3), cap.get(4))
+                objects = ssd_processor.ssd_mobilenet_inference(display_image)
                 # display results
                 process_and_display_results(objects, display_image, labels_list)
                 
