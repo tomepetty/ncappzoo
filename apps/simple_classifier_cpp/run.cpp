@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     
     // ----------------------- Create IE core object and read the network ----------------------- //
     // Create the inference engine core object
-    Core ie_core;
+    Core ieCore;
     // Create a network reader and read in the network and weights
     CNNNetReader networkReader;
     networkReader.ReadNetwork(XML);
@@ -80,11 +80,11 @@ int main(int argc, char *argv[]) {
     
     // ----------------------- Load the network and create the inference request ----------------------- //
     // Load the network to the device (default: Myriad)
-    auto executableNetwork = ie_core.LoadNetwork(network, DEVICE);
+    auto executableNetwork = ieCore.LoadNetwork(network, DEVICE);
     // Create the inference request
     auto inferenceRequest = executableNetwork.CreateInferRequestPtr();
     
-    // ----------------------- 5. Prepare the input data ----------------------- //
+    // ----------------------- Prepare the input data ----------------------- //
     // Create buffer to hold input data
     auto inputBlob = inferenceRequest->GetBlob(inputLayerName);
     auto inputData = inputBlob->buffer().as<PrecisionTrait<Precision::U8>::value_type*>();
@@ -110,10 +110,10 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    // ----------------------- 6. Make the inference ----------------------- //
+    // ----------------------- Make the inference ----------------------- //
     inferenceRequest->Infer();
     
-    // ----------------------- 7. Process the results ----------------------- //
+    // ----------------------- Process the results ----------------------- //
     // Get the inference results
     auto inferenceResults = inferenceRequest->GetBlob(outputLayerName);
     // Get all of the confidence scores. 
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
     unsigned int resultsToDisplay = 5;   // How many results should return?
     TopResults(resultsToDisplay, *inferenceResults, sortedResults);
 
-    // ----------------------- 8. Display the results ----------------------- //  
+    // ----------------------- Display the results ----------------------- //  
     std::cout << std::endl << "\033[1;33m **********  Results  ***********\033[0m"<< std::endl << std::endl;
     for (size_t resultIndex = 0; resultIndex < resultsToDisplay; ++resultIndex) {
         auto confidenceScore = scores[sortedResults[resultIndex]] * 100;
