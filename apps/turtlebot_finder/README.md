@@ -22,19 +22,19 @@ This program requires:
 4. Create the udev rules for the Kobuki base - **rosrun kobuki_ftdi create_udev_rules**
 
 ## How to run this sample code
-1. Open a terminal and navigate to the Turtlebot_finder folder. Run the tb_start.sh script using the command: ***./tb_start.sh*** <br>
+1. Open a terminal and navigate to the Turtlebot_finder folder. Run the tb_start.sh script using the command: **./tb_start.sh** <br>
 
 You must use the tb_start.sh script to start a ROS Master first before running run.py. The ROS Master must be running in a terminal at all times for communication to exist between the turtlebot and the python script. 
 
 2. Open another terminal and navigate to the Turtlebot_finder folder. Set your OpenVINO environment variables for the terminal by sourcing your setupvars.bin file. This file should be located in the bin folder of your OpenVINO install location. <br>
-**EXAMPLE:** **source ~/intel/OpenVINO/bin/setupvars.sh** <br>
+EXAMPLE: **source ~/intel/OpenVINO/bin/setupvars.sh** <br>
 
 3. Add the OpenVINO Python2 folder to your Python Path environment variable. <br>
-**EXAMPLE:** **export PYTHONPATH=/home/YOUR_USER_NAME/intel/openvino_2019.3.376/python/python2.7:$PYTHONPATH**
+EXAMPLE: **export PYTHONPATH=/home/YOUR_USER_NAME/intel/openvino_2019.3.376/python/python2.7:$PYTHONPATH**
 
 4. Start the application using the command: ***python2 run.py*** or ***make run***<br>
 You can also use some built in flags to enable more features and options. <br>
-**EXAMPLE:** ***python2 run.py -a -f person*** <br>
+EXAMPLE: **python2 run.py -a -f person** <br>
 
 #### FLAGS/OPTIONS
 
