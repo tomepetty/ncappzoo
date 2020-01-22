@@ -26,10 +26,10 @@ This program requires:
 
 You must use the tb_start.sh script to start a ROS Master first before running run.py. The ROS Master must be running in a terminal at all times for communication to exist between the turtlebot and the python script. 
 
-2. Open another terminal and navigate to the Turtlebot_finder folder. Set your OpenVINO environment variables for the terminal by sourcing your setupvars.bin file. This file should be located in the bin folder of your OpenVINO install location. 
-**EXAMPLE:** **source ~/intel/OpenVINO/bin/setupvars.sh**
+2. Open another terminal and navigate to the Turtlebot_finder folder. Set your OpenVINO environment variables for the terminal by sourcing your setupvars.bin file. This file should be located in the bin folder of your OpenVINO install location. <br>
+**EXAMPLE:** **source ~/intel/OpenVINO/bin/setupvars.sh** <br>
 
-3. Add the OpenVINO Python2 folder to your Python Path environment variable.
+3. Add the OpenVINO Python2 folder to your Python Path environment variable. <br>
 **EXAMPLE:** **export PYTHONPATH=/home/YOUR_USER_NAME/intel/openvino_2019.3.376/python/python2.7:$PYTHONPATH**
 
 4. Start the application using the command: ***python2 run.py*** or ***make run***<br>
@@ -39,56 +39,56 @@ You can also use some built in flags to enable more features and options. <br>
 #### FLAGS/OPTIONS
 
 * -f, --find
-> - default = dog<br>
-> AVAILBLE OPTIONS: aeroplane, bicycle, bird, boat, bottle,
+> * default = dog<br>
+> * AVAILABLE OPTIONS: aeroplane, bicycle, bird, boat, bottle,
 > bus, car, cat, chair, cow, diningtable, dog, horse, motorbike,
 > person, pottedplant, sheep, sofa, train, tvmonitor<br>
-> EXAMPLE: -f=person
+> * EXAMPLE: -f=person
 
 * -v, --velocity
-> - default = 70<br>
-> Velocity value: integer value 1-100. <br>
-> EXAMPLE: -v=70
+> * default = 70<br>
+> * Velocity value: integer value 1-100. <br>
+> * EXAMPLE: -v=70
 
 * -c, --cam_src
-> - default = 0<br>
-> Camera index: index of video camera.<br>
-> EXAMPLE: -c=0
+> * default = 0<br>
+> * Camera index: index of video camera.<br>
+> * EXAMPLE: -c=0
 
 * -x, --xml
-> - default = ../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.xml<br>
-> OpenVINO IR .xml file. <br>
-> EXAMPLE: -x=../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.xml
+> * default = ../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.xml<br>
+> * OpenVINO IR xml file. <br>
+> * EXAMPLE: -x=../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.xml
 
 * -b, --bin
-> - default = ../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.bin<br>
-> OpenVINO IR .bin file. <br>
-> EXAMPLE: -b=../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.bin
+> * default = ../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.bin<br>
+> * OpenVINO IR bin file. <br>
+> * EXAMPLE: -b=../../networks/ssd_mobilenet_v1_caffe/mobilenet-ssd.bin
 
 * -l, --labels
-> - default = ../../networks/ssd_mobilenet_v1_caffe/labels.txt<br>
-> Model labels text file. <br>
-> EXAMPLE: -x=../../networks/ssd_mobilenet_v1_caffe/labels.txt
+> * default = ../../networks/ssd_mobilenet_v1_caffe/labels.txt<br>
+> * Model labels text file. <br>
+> * EXAMPLE: -x=../../networks/ssd_mobilenet_v1_caffe/labels.txt
 
 * --class_name
-> - default = Ssd_mobilenet_object_detector<br>
-> Object detector class name inherited from Object_detector (found in shared/Python). <br>
-> EXAMPLE: -x=Ssd_mobilenet_object_detector
+> * default = Ssd_mobilenet_object_detector<br>
+> * Object detector class name inherited from Object_detector (found in shared/Python). <br>
+> * EXAMPLE: -x=Ssd_mobilenet_object_detector
 
 * -r, --cam_res
-> - default = [1280, 720]<br>
-> Camera capture resolution.<br>
-> EXAMPLE: -r=[640, 360]
+> * default = [1280, 720]<br>
+> * Camera capture resolution.<br>
+> * EXAMPLE: -r=[640, 360]
 
 * -d, --detection_window
-> - default = False<br>
-> Displays the detection window.<br>
-> EXAMPLE: -d
+> * default = False<br>
+> * Displays the detection window.<br>
+> * EXAMPLE: -d
 
 * -a, --animation_window
-> - default = False<br>
-> Displays the animation window.<br>
-> EXAMPLE: -a
+> * default = False<br>
+> * Displays the animation window.<br>
+> * EXAMPLE: -a
 
 ## Makefile
 Provided Makefile has various targets that help with the above mentioned tasks.
