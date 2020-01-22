@@ -30,11 +30,11 @@ You must use the tb_start.sh script to start a ROS Master first before running r
 **EXAMPLE:** **source ~/intel/OpenVINO/bin/setupvars.sh**
 
 3. Add the OpenVINO Python2 folder to your Python Path environment variable.
-**EXAMPLE:** **export PYTHONPATH=/home/tvang/intel/openvino_2019.3.376/python/python2.7:$PYTHONPATH**
+**EXAMPLE:** **export PYTHONPATH=/home/YOUR_USER_NAME/intel/openvino_2019.3.376/python/python2.7:$PYTHONPATH**
 
 4. Start the application using the command: ***python2 run.py*** or ***make run***<br>
 You can also use some built in flags to enable more features and options. <br>
-**EXAMPLE COMMAND:** ***python2 run.py -a -f person*** <br>
+**EXAMPLE:** ***python2 run.py -a -f person*** <br>
 
 #### FLAGS/OPTIONS
 
